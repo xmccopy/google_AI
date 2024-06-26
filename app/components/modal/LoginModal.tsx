@@ -1,5 +1,6 @@
 'use client'
 
+import { signIn } from 'next-auth/react'
 import axios from 'axios'
 import { AiFillGithub } from 'react-icons/ai'
 import { FcGoogle } from 'react-icons/fc'
@@ -11,14 +12,17 @@ import {
 } from 'react-hook-form'
 
 import useRegisterModal from '@/app/hook/useRegisterModal';
-import Modal from './Modal'
-import Heading from '../Heading'
-import Input from '../inputs/Input'
-import toast from 'react-hot-toast'
-import Button from '../Button'
+import useLoginModal from '@/app/hook/useLoginModal';
 
-const RegisterModal = () => {
+import Modal from './Modal';
+import Heading from '../Heading';
+import Input from '../inputs/Input';
+import toast from 'react-hot-toast';
+import Button from '../Button';
+
+const LoginModal = () => {
     const registerModal = useRegisterModal()
+    const loginModal = useLoginModal()
     const [isLoading, setIsLoading] = useState(false);
 
     const {
@@ -29,7 +33,6 @@ const RegisterModal = () => {
         }
     } = useForm<FieldValues>({
         defaultValues: {
-            name: '',
             email: '',
             password: ''
         }
@@ -38,23 +41,16 @@ const RegisterModal = () => {
     const onSubmit: SubmitHandler<FieldValues> = (data) => {
         setIsLoading(true);
 
-        axios.post('/api/register', data)
-            .then(() => {
-                registerModal.onClose();
-            })
-            .catch((error) => {
-                toast.error('Something went Wrong!');
-            })
-            .finally(() => {
-                setIsLoading(false);
-            })
+        signIn('credentials', {
+            ...data
+        })
     }
  
     const bodyContent = (
         <div className='flex flex-col gap-4'>
             <Heading
-                title='Welcome to AI'
-                subtitle='Create an account'
+                title='Welcome back'
+                subtitle='Login to your account'
             />
             <Input
                 id='email'
@@ -64,15 +60,8 @@ const RegisterModal = () => {
                 errors={errors}
                 required
             />
-             <Input
-                id='name'
-                label='Name'
-                disabled={isLoading}
-                register={register}
-                errors={errors}
-                required
-            />
-             <Input
+            
+            <Input
                 id='password'
                 type='password'
                 label='Password'
@@ -129,10 +118,10 @@ const RegisterModal = () => {
     return (
         <Modal
             disabled={isLoading}
-            isOpen={registerModal.isOpen}
-            title="Register"
+            isOpen={loginModal.isOpen}
+            title="Log in"
             actionLabel="Continue"
-            onClose={registerModal.onClose}
+            onClose={loginModal.onClose}
             onSubmit={handleSubmit(onSubmit)}
             body={bodyContent}
             footer={footerContent}
@@ -140,4 +129,4 @@ const RegisterModal = () => {
     )
 }
 
-export default RegisterModal;
+export default LoginModal;
